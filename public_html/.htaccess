@@ -1,0 +1,4 @@
+RewriteEngine On
+
+# Redirigir todo a la carpeta "public" de Laravel
+RewriteRule ^(.*)$ laravel/public/$1 [L]
