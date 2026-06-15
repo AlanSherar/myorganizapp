@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  html {
+    @apply bg-stone-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  body {
+    @apply min-h-screen bg-stone-100 text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  ::selection {
+    @apply bg-indigo-200 text-slate-900 dark:bg-indigo-500/30 dark:text-slate-100;
+  }
+}
+
+@layer components {
+  .app-card {
+    @apply rounded-2xl border border-stone-200 bg-white/90 p-6 shadow-sm shadow-stone-200/50 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-black/20;
+  }
+
+  .app-input {
+    @apply mt-1 block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-indigo-400;
+  }
+
+  .app-label {
+    @apply block text-sm font-medium text-slate-700 dark:text-slate-300;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400/30;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-300/40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800;
+  }
+
+  .btn-success {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400/30;
+  }
+
+  .btn-soft-success {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/15;
+  }
+
+  .btn-soft-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/15;
+  }
+
+  .badge-base {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+
+  .badge-high {
+    @apply bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300;
+  }
+
+  .badge-medium {
+    @apply bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200;
+  }
+
+  .badge-low {
+    @apply bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300;
+  }
+
+  .badge-recurring {
+    @apply bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300;
+  }
+
+  .table-shell {
+    @apply overflow-hidden rounded-2xl border border-stone-200 bg-white/90 shadow-sm shadow-stone-200/50 dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-black/20;
+  }
+
+  .table-head {
+    @apply bg-stone-100 text-xs uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300;
+  }
+
+  .table-row {
+    @apply border-b border-stone-200/80 bg-white/80 text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300;
+  }
+}
