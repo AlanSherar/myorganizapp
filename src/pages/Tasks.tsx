@@ -90,8 +90,8 @@ const Tasks: React.FC = () => {
     return 'badge-base badge-low';
   };
 
-  const pendingTasks = tasks.filter((t) => t.status === 'pending');
-  const completedTasks = tasks.filter((t) => t.status === 'completed');
+  const pendingTasks = React.useMemo(() => tasks.filter((t) => t.status === 'pending'), [tasks]);
+  const completedTasks = React.useMemo(() => tasks.filter((t) => t.status === 'completed'), [tasks]);
   const selectedCompletedIds = Object.keys(selectedCompleted).filter((id) => selectedCompleted[id]);
 
   React.useEffect(() => {
