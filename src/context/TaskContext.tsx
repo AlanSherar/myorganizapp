@@ -7,9 +7,10 @@ export interface Task {
   description?: string;
   type: 'one-time' | 'recurring';
   recurrence?: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  status: 'pending' | 'completed';
+  status: 'pending' | 'completed' | 'missed';
   priority: 'low' | 'medium' | 'high';
   dueDate?: string;
+  keepIfMissed?: boolean;
 }
 
 interface TaskContextType {

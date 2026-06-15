@@ -6,10 +6,15 @@ export interface ITask extends Document {
   description?: string;
   type: 'one-time' | 'recurring';
   recurrence?: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  status: 'pending' | 'completed';
+  status: 'pending' | 'completed' | 'missed';
   priority: 'low' | 'medium' | 'high';
   dueDate?: Date;
+  intervalStart?: Date;
+  intervalEnd?: Date;
+  seriesId?: string;
+  keepIfMissed?: boolean;
   completedAt?: Date;
+  missedAt?: Date;
 }
 
 const TaskSchema: Schema = new Schema({
@@ -18,10 +23,15 @@ const TaskSchema: Schema = new Schema({
   description: { type: String },
   type: { type: String, enum: ['one-time', 'recurring'], default: 'one-time' },
   recurrence: { type: String, enum: ['daily', 'weekly', 'monthly', 'yearly'] },
-  status: { type: String, enum: ['pending', 'completed'], default: 'pending' },
+  status: { type: String, enum: ['pending', 'completed', 'missed'], default: 'pending' },
   priority: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
   dueDate: { type: Date },
+  intervalStart: { type: Date },
+  intervalEnd: { type: Date },
+  seriesId: { type: String, index: true },
+  keepIfMissed: { type: Boolean, default: false },
   completedAt: { type: Date },
+  missedAt: { type: Date },
 }, { timestamps: true });
 
 export default mongoose.model<ITask>('Task', TaskSchema);
