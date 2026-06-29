@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ITask extends Document {
   user: mongoose.Types.ObjectId;
+  series?: mongoose.Types.ObjectId;
   title: string;
   description?: string;
   type: 'one-time' | 'recurring';
@@ -19,6 +20,7 @@ export interface ITask extends Document {
 
 const TaskSchema: Schema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  series: { type: Schema.Types.ObjectId, ref: 'TaskSeries' },
   title: { type: String, required: true },
   description: { type: String },
   type: { type: String, enum: ['one-time', 'recurring'], default: 'one-time' },

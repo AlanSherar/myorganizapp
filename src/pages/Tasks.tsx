@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useTasks, Task } from '../context/TaskContext';
-import { Plus, Trash2, CheckCircle, Circle, Repeat } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Repeat, RotateCcw } from 'lucide-react';
 
 const Tasks: React.FC = () => {
   const { tasks, addTask, updateTask, deleteTask } = useTasks();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'todo' | 'completed' | 'missed'>('todo');
   const [now, setNow] = useState(() => Date.now());
+  const [dueDateDate, setDueDateDate] = useState('');
+  const [dueDateTime, setDueDateTime] = useState('23:59');
   const [formData, setFormData] = useState<Partial<Task>>({
     title: '',
     type: 'one-time',
@@ -26,9 +28,18 @@ const Tasks: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title) return;
-    await addTask(formData as any);
+    const payload: any = { ...formData };
+    if (dueDateDate) {
+      const dateTime = new Date(`${dueDateDate}T${dueDateTime}:00`);
+      payload.dueDate = dateTime.toISOString();
+    } else {
+      delete payload.dueDate;
+    }
+    await addTask(payload);
     setIsFormOpen(false);
     setFormData({ title: '', type: 'one-time', priority: 'medium', status: 'pending' });
+    setDueDateDate('');
+    setDueDateTime('23:59');
   };
 
   const COMPLETION_DELAY_MS = 4599;
@@ -172,6 +183,18 @@ const Tasks: React.FC = () => {
     }
   };
 
+  const revertCompletedTask = async (task: Task) => {
+    const nowDate = new Date();
+    const due = task.dueDate ? new Date(task.dueDate) : null;
+    const targetStatus: Task['status'] = due && due.getTime() < nowDate.getTime() ? 'missed' : 'pending';
+
+    await updateTask(task._id, { status: targetStatus });
+    setSelectedCompleted((prev) => {
+      const { [task._id]: _, ...rest } = prev;
+      return rest;
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -271,14 +294,22 @@ const Tasks: React.FC = () => {
                   <option value="high">High</option>
                 </select>
             </div>
-            <div>
-               <label className="app-label">Due Date</label>
-               <input
+            <div className="col-span-2">
+              <label className="app-label">Due Date</label>
+              <div className="mt-1 flex gap-2">
+                <input
                   type="date"
-                  value={formData.dueDate ? new Date(formData.dueDate).toISOString().split('T')[0] : ''}
-                  onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
+                  value={dueDateDate}
+                  onChange={e => setDueDateDate(e.target.value)}
                   className="app-input"
-               />
+                />
+                <input
+                  type="time"
+                  value={dueDateTime}
+                  onChange={(e) => setDueDateTime(e.target.value)}
+                  className="app-input"
+                />
+              </div>
             </div>
           </div>
           {formData.type === 'recurring' && (
@@ -341,7 +372,7 @@ const Tasks: React.FC = () => {
                             </span>
                           )}
                           {task.keepIfMissed && <span className="badge-base bg-stone-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">mantener</span>}
-                          {task.dueDate && <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>}
+                          {task.dueDate && <span>Due: {new Date(task.dueDate).toLocaleString()}</span>}
                           {pending && <span>Completando en {remainingSeconds}s (click para cancelar)</span>}
                         </div>
                       </div>
@@ -403,9 +434,14 @@ const Tasks: React.FC = () => {
                     className="h-4 w-4 rounded border-stone-300 text-indigo-600 focus:ring-indigo-400/30 dark:border-slate-700 dark:bg-slate-800"
                   />
 
-                  <div className="text-slate-400 dark:text-slate-500" aria-hidden="true">
-                    <CheckCircle className="text-emerald-600 dark:text-emerald-400" />
-                  </div>
+                  <button
+                    onClick={() => revertCompletedTask(task)}
+                    className="text-slate-500 transition-colors hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300"
+                    aria-label="Revertir tarea"
+                    title="Revertir"
+                  >
+                    <RotateCcw size={18} />
+                  </button>
 
                   <div>
                     <h3 className="font-medium text-slate-600 dark:text-slate-300">{task.title}</h3>
@@ -416,7 +452,7 @@ const Tasks: React.FC = () => {
                           <Repeat size={12} /> {task.recurrence}
                         </span>
                       )}
-                      {task.dueDate && <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>}
+                      {task.dueDate && <span>Due: {new Date(task.dueDate).toLocaleString()}</span>}
                     </div>
                   </div>
                 </div>
@@ -452,7 +488,7 @@ const Tasks: React.FC = () => {
                           <Repeat size={12} /> {task.recurrence}
                         </span>
                       )}
-                      {task.dueDate && <span>Venció: {new Date(task.dueDate).toLocaleDateString()}</span>}
+                      {task.dueDate && <span>Venció: {new Date(task.dueDate).toLocaleString()}</span>}
                     </div>
                   </div>
                 </div>
