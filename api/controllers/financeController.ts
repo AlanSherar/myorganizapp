@@ -1,102 +1,59 @@
-import { Request, Response } from 'express';
-import Transaction from '../models/Transaction.js';
+import { Request, Response } from 'express'
+import { services } from '../services/index.js'
+import type { StatementSource } from '../services/financeService.js'
+
+const DEFAULT_USER_ID = '60d0fe4f5311236168a109ca'
 
 export const getTransactions = async (req: Request, res: Response) => {
   try {
-    const transactions = await Transaction.find({ user: req.body.user.id || '60d0fe4f5311236168a109ca' }).sort({ date: -1 });
-    res.json(transactions);
+    const userId = (req.body.user?.id as string) || DEFAULT_USER_ID
+    const transactions = await services.finance.getTransactions(userId)
+    res.json(transactions)
   } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
+    console.error('[financeController.getTransactions]', error)
+    res.status(500).json({ message: 'Server Error' })
   }
-};
+}
 
 export const addTransaction = async (req: Request, res: Response) => {
   try {
-    const transaction = await Transaction.create({
-        ...req.body,
-        user: req.body.user.id || '60d0fe4f5311236168a109ca'
-    });
-    res.status(201).json(transaction);
+    const userId = (req.body.user?.id as string) || DEFAULT_USER_ID
+    const { amount, date, category, sourceBank, type, description } = req.body
+    const transaction = await services.finance.addTransaction(userId, {
+      amount,
+      date,
+      category,
+      sourceBank,
+      type,
+      description,
+    })
+    res.status(201).json(transaction)
   } catch (error) {
-    res.status(400).json({ message: 'Invalid Data' });
+    console.error('[financeController.addTransaction]', error)
+    res.status(400).json({ message: 'Invalid Data' })
   }
-};
+}
 
 export const deleteTransaction = async (req: Request, res: Response) => {
-    try {
-      await Transaction.findByIdAndDelete(req.params.id);
-      res.json({ message: 'Transaction Removed' });
-    } catch (error) {
-      res.status(500).json({ message: 'Delete Failed' });
-    }
-  };
+  try {
+    await services.finance.deleteTransaction(req.params.id)
+    res.json({ message: 'Transaction Removed' })
+  } catch (error) {
+    console.error('[financeController.deleteTransaction]', error)
+    res.status(500).json({ message: 'Delete Failed' })
+  }
+}
 
-// Mock Parser Service
 export const uploadStatement = async (req: Request, res: Response) => {
-    const { source, data } = req.body; // data is the raw string/json content
-    const userId = req.body.user.id || '60d0fe4f5311236168a109ca';
-    
-    let transactions: any[] = [];
-
-    try {
-        if (source === 'bbva') {
-            // Mock CSV: Date,Description,Amount (Income positive, Expense negative)
-            // Example: "2023-10-01,Salary,1000\n2023-10-02,Rent,-500"
-            const lines = (data as string).split('\n');
-            lines.forEach(line => {
-                const [date, desc, amountStr] = line.split(',');
-                if (!date || !amountStr) return;
-                const amount = parseFloat(amountStr);
-                transactions.push({
-                    user: userId,
-                    date: new Date(date),
-                    category: 'Uncategorized',
-                    sourceBank: 'BBVA',
-                    type: amount >= 0 ? 'income' : 'expense',
-                    amount: Math.abs(amount),
-                    description: desc
-                });
-            });
-        } else if (source === 'mercadopago') {
-            // Mock JSON
-            const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-            parsed.forEach((item: any) => {
-                transactions.push({
-                    user: userId,
-                    date: new Date(item.date_created),
-                    category: 'Uncategorized',
-                    sourceBank: 'MercadoPago',
-                    type: item.type === 'money_in' ? 'income' : 'expense',
-                    amount: item.transaction_amount,
-                    description: item.description
-                });
-            });
-        } else if (source === 'nacion') {
-            // Mock CSV: Date;Concept;Amount
-            const lines = (data as string).split('\n');
-            lines.forEach(line => {
-                const [date, desc, amountStr] = line.split(';');
-                if (!date || !amountStr) return;
-                const amount = parseFloat(amountStr);
-                transactions.push({
-                    user: userId,
-                    date: new Date(date),
-                    category: 'Uncategorized',
-                    sourceBank: 'Banco Nación',
-                    type: amount >= 0 ? 'income' : 'expense',
-                    amount: Math.abs(amount),
-                    description: desc
-                });
-            });
-        }
-
-        if (transactions.length > 0) {
-            await Transaction.insertMany(transactions);
-        }
-
-        res.status(201).json({ message: `Imported ${transactions.length} transactions`, transactions });
-    } catch (error) {
-        console.error(error);
-        res.status(400).json({ message: 'Parsing Failed' });
-    }
-};
+  try {
+    const userId = (req.body.user?.id as string) || DEFAULT_USER_ID
+    const { source, data }: { source: StatementSource; data: string | unknown } = req.body
+    const result = await services.finance.uploadStatement(userId, source, data)
+    res
+      .status(201)
+      .json({ message: `Imported ${result.imported} transactions`, transactions: result.transactions })
+  } catch (error) {
+    console.error('[financeController.uploadStatement]', error)
+    res.status(400).json({ message: 'Parsing Failed' })
+  }
+}
