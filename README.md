@@ -23,7 +23,7 @@ OrganizAPP es una aplicación para ordenar tu día a día en un solo lugar:
 | Crear y borrar tareas | ✅ Lista | Con título, prioridad y fecha/hora de vencimiento. |
 | Tareas que se repiten | ✅ Lista | Diarias, semanales, mensuales o anuales. Ver la aclaración sobre el modo *Supabase* más abajo. |
 | Completar una tarea (con opción de arrepentirse) | ✅ Lista | Tenés unos segundos para cancelar antes de que quede completada. |
-| Tareas vencidas ("No completadas") | ✅ Lista | Las tareas que pasan su fecha se mueven solas a esa pestaña. |
+| Tareas vencidas ("No completadas") | ✅ Lista | Las tareas que pasan su fecha se mueven a esa pestaña al abrir o recargar la app. |
 | Borrar varias tareas completadas juntas | ✅ Lista | Con un aviso de confirmación antes de borrar. |
 | Cargar ingresos y gastos a mano | ✅ Lista | Se pueden borrar, pero **no editar**. |
 | Importar movimientos del banco | 🟡 Parcial | Solo acepta un formato muy simple (ver más abajo). Todo lo importado queda sin categoría. |
@@ -40,6 +40,11 @@ OrganizAPP es una aplicación para ordenar tu día a día en un solo lugar:
 - **Dónde quedan guardados tus datos depende de cómo abras la app** (ver [Cómo abrir la app](#cómo-abrir-la-app)). En algunos casos los datos se pueden perder.
 - **No hay ningún aviso al importar movimientos del banco:** si el texto no tiene el formato correcto, no se carga nada y la app no te lo dice.
 - **El balance del mes** junta los movimientos del mismo mes de *cualquier* año (por ejemplo, noviembre 2025 y noviembre 2026 se suman juntos).
+- **Problemas con las fechas** (porque la app calcula el día con la hora internacional, que va 3 horas adelantada respecto de Argentina):
+  - en la tabla de Finanzas, cada movimiento aparece con **un día menos** que la fecha que cargaste (cargás el 15 y se ve el 14);
+  - por lo mismo, un movimiento cargado el **día 1** se suma al balance del **mes anterior**;
+  - **después de las 21 h** la app ya considera que es el día siguiente: lo que marques en Rutinas cuenta para mañana, el puntaje de disciplina vuelve a cero, y la fecha que viene puesta al cargar un movimiento es la de mañana.
+- **Las tareas vencidas no se mueven mientras mirás la pantalla:** pasan a "No completadas" recién cuando abrís o recargás la app (tecla F5), o cuando hacés algún cambio en las tareas.
 - **En el modo "Supabase Directo"** (una de las formas de guardar datos):
   - las tareas repetitivas **no** crean solas la siguiente repetición,
   - las tareas vencidas **no** pasan solas a "No completadas",
@@ -53,8 +58,9 @@ OrganizAPP es una aplicación para ordenar tu día a día en un solo lugar:
 3. Editar ingresos y gastos, y ponerles categoría a los importados.
 4. Rutinas: elegir los días de la semana y ver qué se marcó hoy.
 5. Importar los archivos reales que descargan los bancos, con un mensaje de cuántos movimientos se cargaron.
-6. Pasar toda la app a español.
-7. Igualar el modo "Supabase Directo" con los otros modos.
+6. Corregir los problemas de fechas (usar siempre la hora de Argentina).
+7. Pasar toda la app a español.
+8. Igualar el modo "Supabase Directo" con los otros modos.
 
 ---
 
@@ -70,18 +76,19 @@ OrganizAPP es una aplicación para ordenar tu día a día en un solo lugar:
    |---|---|---|---|
    | **`l`** | Local | Los datos quedan guardados **solo en este navegador de esta computadora**. No hace falta configurar nada. Si borrás los datos del navegador, o abrís la app en otro navegador o en otra computadora, no vas a ver lo que cargaste. | ✅ **Recomendado** para empezar y para uso personal. |
    | `s` | Supabase Directo | Los datos se guardan en internet (en un servicio llamado Supabase) y se pueden ver desde cualquier computadora. | Requiere que alguien técnico lo configure. Tiene las limitaciones de arriba. |
-   | `r` | Remoto | Los datos los maneja un programa aparte (el "servidor") que se abre junto con la app. Después pregunta qué base de datos usar: `m` (MongoDB) o `s` (Supabase). | Uso técnico. **Ojo:** si elegís MongoDB y no está instalado, los datos se guardan de forma temporal y **se borran al cerrar la ventana**. |
+   | `r` | Remoto | Los datos los maneja un programa aparte (el "servidor") que se abre junto con la app. Después pregunta qué base de datos usar (el "archivo" donde quedan guardados los datos): `m` (MongoDB) o `s` (Supabase). | Uso técnico. **Ojo:** si elegís MongoDB y no está instalado, los datos se guardan de forma temporal y **se borran al cerrar la ventana**. |
 
 4. Se abre el navegador con la app. Si la página aparece en blanco, esperá unos segundos y recargala (tecla F5).
 5. **No cierres la ventana negra mientras usás la app**: si la cerrás, la app deja de funcionar. Para salir, cerrá el navegador y después la ventana negra.
 
-La app recuerda la opción que elegiste la próxima vez que la abras en el mismo navegador.
+Si más adelante abrís la app directamente desde el navegador (sin la ventana negra del paso 1), usa la última opción que elegiste en ese navegador.
 
 ### Si aparece un error al abrirla
 
 | Mensaje en la ventana negra | Qué hacer |
 |---|---|
 | `Node.js NO se encontro` | Falta instalar Node.js (el programa que hace funcionar la app). Descargalo de [nodejs.org](https://nodejs.org), instalalo y reiniciá la computadora. |
+| `npm NO se encontro` | Normalmente se arregla reiniciando la computadora después de instalar Node.js. Si sigue, reinstalá Node.js. |
 | `No existe la carpeta "node_modules"` | Falta el paso de instalación. Ver [Instalación](#instalación). |
 | `PROCESO FINALIZADO CON ERROR` | Algo falló al arrancar. Sacale una foto a la ventana y pasásela a quien mantiene la app. |
 
@@ -123,7 +130,7 @@ Para anotar cosas que tenés que hacer, una sola vez o de forma repetida.
 
 - **Por hacer**: tareas pendientes.
 - **Completadas**: tareas que ya terminaste.
-- **No completadas**: tareas cuya fecha límite pasó sin que las completaras. Pasan acá solas.
+- **No completadas**: tareas cuya fecha límite pasó sin que las completaras. Pasan acá cuando abrís o recargás la app (tecla F5).
 
 **Completar una tarea**
 
@@ -164,7 +171,7 @@ Para registrar ingresos y gastos.
    - **Date** (Fecha): viene con la fecha de hoy.
 3. Tocá **Save Transaction** (Guardar movimiento).
 
-El movimiento aparece en la tabla: los ingresos en verde con `+` y los gastos en rojo con `-`. Para borrarlo, tocá el tachito de esa fila. **Los movimientos no se pueden editar**: si te equivocaste, borralo y cargalo de nuevo.
+El movimiento aparece en la tabla: los ingresos en verde con `+` y los gastos en rojo con `-`. La columna **Description** (Descripción) solo se completa en los movimientos importados del banco; en los cargados a mano muestra un guion. Para borrarlo, tocá el tachito de esa fila. **Los movimientos no se pueden editar**: si te equivocaste, borralo y cargalo de nuevo.
 
 **Importar movimientos del banco**
 
